@@ -1,9 +1,9 @@
 #include "def.h"
 
-#define STACK_BASE  0x20020000
-#define STACK_SIZE  0x8000
-#define HEAP_BASE   0x20020000
-#define HEAP_SIZE   0x10000 - STACK_SIZE
+#define STACK_BASE 0x20020000
+#define STACK_SIZE 0x8000
+#define HEAP_BASE 0x20020000
+#define HEAP_SIZE 0x10000 - STACK_SIZE
 
 enum { MSP = 0, RST = 1, NMI = 2, HARDWARE_ERROR = 3, SVC = 11 };
 
