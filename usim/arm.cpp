@@ -4,6 +4,8 @@
 #include <iostream>
 #include <iomanip>
 
+static int inc = 0;
+
 CortexM0::CortexM0(Clock& clock, SystemBus *sysbus)
     : alu(m_regs, &m_c, &m_o, &m_n, &m_z, &m_addr, &m_data)
     , debug(m_regs, &m_c, &m_o, &m_n, &m_z, sysbus)
@@ -22,7 +24,7 @@ CortexM0::CortexM0(Clock& clock, SystemBus *sysbus)
 
 uint16_t CortexM0::fetch_inst()
 {
-  return m_sysbus->read32(m_regs[15]) & 0xFFFF;
+  return m_sysbus->read32(m_regs[15] + inc) & 0xFFFF;
 }
 
 static inline bool IS_32BIT(uint32_t inst) 
@@ -32,10 +34,8 @@ static inline bool IS_32BIT(uint32_t inst)
 
 void CortexM0::init()
 {
-  auto &&msp = fetch_inst();
-  m_regs[13] = msp;
-  m_regs[15] += 4;
-  auto &&rst = fetch_inst();
+  auto &&msp = m_sysbus->read32(0x0000'0000);
+  auto &&rst = m_sysbus->read32(0x0000'0004) & (~0x1);
   m_regs[15] = rst;
   printf("msp: 0x%08x, rst: 0x%08x\n", msp, rst);
 }
@@ -43,19 +43,28 @@ void CortexM0::init()
 void CortexM0::execute()
 {
   DecodedInst di;
-  uint16_t inst;
+  uint32_t inst_lo16;
+  uint32_t inst_hi16;
   uint32_t inst32;
 
-  inst = fetch_inst();
-  m_regs[15] += 2;
-
-  if (!IS_32BIT(inst)) {
-    di = decoder.decode(inst, 0);
+  inst_lo16 = fetch_inst();
+  inc = 2;
+  inst_hi16 = fetch_inst();
+  inst32 = (inst_lo16 << 16) | inst_hi16;
+  if (!IS_32BIT(inst_lo16)) {
+    inst32 = (inst32 >> 16) & 0xFFFF;
+    di = decoder.decode(inst_lo16, 0);
   } else {
-    inst32 = (((uint32_t) inst) << 16) | fetch_inst();
-    m_regs[15] += 2;
-    di = decoder.decode(inst, 1);
+    inc += 2;
+    di = decoder.decode(inst32, 1);
   }
+
+#ifdef DEBUG_MODE
+  debug.pause(inst32, di);
+#endif
+
+  m_regs[15] += inc;
+  inc = 0;
 
   if (di.op == BKPT) {
     m_halted = true;

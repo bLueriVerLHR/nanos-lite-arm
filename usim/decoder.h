@@ -57,13 +57,13 @@ enum Op {
 #define DECODE32_TAB_SIZE 7
 
 struct DecodedInst {
-  uint8_t op;
-  uint8_t rd;
-  uint8_t rn;
-  uint8_t rm;
-  int32_t imm;
-  uint16_t specific;
-  bool setflags;
+  uint8_t op { };
+  uint8_t rd { };
+  uint8_t rn { };
+  uint8_t rm { };
+  int32_t imm{ };
+  uint16_t specific { };
+  bool setflags { };
 };
 
 class Decoder;
@@ -85,7 +85,7 @@ private:
   uint32_t m_inst;
   bool m_is32;
   DecodedInst m_di;
-  static const DecoderTab m_decode_table[DECODE_TAB_SIZE];
+  static const DecoderTab   m_decode_table[DECODE_TAB_SIZE];
   static const Decoder32Tab m_decode32_table[DECODE32_TAB_SIZE];
 
   void decode_lsli();
@@ -233,12 +233,12 @@ private:
 
   uint16_t HI16()
   {
-    return (m_inst >> 16) & 0xFF;
+    return (m_inst >> 16) & 0xFFFF;
   }
 
   uint16_t LO16()
   {
-    return (m_inst & 0xFF);
+    return (m_inst & 0xFFFF);
   }
 
 public:

@@ -7,13 +7,15 @@ void init_fs(void);
 void init_proc(void);
 
 int main() {
+  puts("Hello world!\n");
+  
   init_device();
 
   init_ramdisk();
 
   init_fs();
 
-  init_proc();
+  // init_proc();
 
   return 0;
 }

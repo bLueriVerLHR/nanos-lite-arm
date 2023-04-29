@@ -27,7 +27,7 @@
 #define GPRx _args(5, ARGS_ARRAY)
 
 // ISA-depedent definitions
-#define ARGS_ARRAY ("svc #0", "r0", "r1", "r2", "r3", "r4")
+#define ARGS_ARRAY ("svc #0", "r0", "r1", "r2", "r3", "r0")
 
 intptr_t _syscall_(intptr_t type, intptr_t a0, intptr_t a1, intptr_t a2) {
   register intptr_t _gpr1 asm (GPR1) = type;

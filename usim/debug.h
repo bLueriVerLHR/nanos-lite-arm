@@ -3,10 +3,12 @@
 
 #include <cstdint>
 #include <string>
+
+#include "decoder.h"
 #include "sysbus.h"
 
 class Debug {
- private:
+private:
   uint32_t *m_regs;
   bool *m_c;
   bool *m_v;
@@ -15,7 +17,8 @@ class Debug {
   SystemBus *m_sysbus;
 
   uint32_t *parse_reg(std::string reg_name);
- public:
+
+public:
   static const char *REG_NAMES[16];
   static const char FLAGS[4];
   Debug(uint32_t *regs, bool *c, bool *v, bool *n, bool *z, SystemBus *sysbus);
@@ -25,6 +28,8 @@ class Debug {
   void set_flag(char ch, bool val);
   void set_mem32(uint32_t addr, uint32_t value);
   uint32_t get_mem32(uint32_t addr);
+
+  void pause(uint32_t inst, const DecodedInst &di);
 };
 
 #endif

@@ -1,6 +1,10 @@
 #include "common.h"
 
 size_t serial_write(const void *buf, size_t offset, size_t len) {
+  volatile char *serial_port = (char *)SERIAL_PORT;
+  for (size_t i = 0; i < len; ++i) {
+    *serial_port = ((char *)buf)[i];
+  }
   return 0;
 }
 

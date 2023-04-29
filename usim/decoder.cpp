@@ -1,5 +1,6 @@
 #include "decoder.h"
 #include <iostream>
+#include <iomanip>
 
 /*
  * Calculate no. of bits in mask.
@@ -125,6 +126,7 @@ DecodedInst Decoder::decode(uint32_t inst, bool is32)
   m_inst = inst;
   m_is32 = is32;
   m_di.op = UDF;
+  m_di.imm = 0;
   
   if (is32)
     decode_inst32();
@@ -709,6 +711,9 @@ void Decoder::decode_b_t1()
 
 void Decoder::decode_b_t2()
 {
+#ifdef DEBUG_MODE
+  
+#endif
   m_di.op = BCOND;
   m_di.imm = SIMM11() << 1;
   m_di.specific = COND_AL;
@@ -726,9 +731,9 @@ const Decoder32Tab Decoder::m_decode32_table[] = {
 
 void Decoder::decode_bl()
 {
-  unsigned int s = (HI16() >> 10) & 0x1;
+  unsigned int s  = (HI16() >> 10) & 0x1;
   unsigned int j1 = (LO16() >> 13) & 0x1;
-  unsigned int j2 = (LO16() >> 13) & 0x1;
+  unsigned int j2 = (LO16() >> 11) & 0x1;
   unsigned int i1 = !(j1 ^ s);
   unsigned int i2 = !(j2 ^ s);
   uint32_t imm11 = (LO16() & 0x7FF);
@@ -783,8 +788,8 @@ void Decoder::decode_inst32()
   int tabsize = sizeof(m_decode32_table) / sizeof(m_decode32_table[0]);
 
   for (i = 0; i < tabsize; i++) {
-    uint16_t mask = m_decode32_table[i].mask;
-    uint16_t match = m_decode32_table[i].match;
+    uint16_t mask   = m_decode32_table[i].mask;
+    uint16_t match  = m_decode32_table[i].match;
 
     if ((m_inst & mask) == match) {
       (this->*(m_decode32_table[i].decode))();
@@ -799,8 +804,8 @@ void Decoder::decode_inst()
   int tabsize = sizeof(m_decode_table) / sizeof(m_decode_table[0]);
 
   for (i = 0; i < tabsize; i++) {
-    uint16_t mask = m_decode_table[i].mask;
-    uint16_t match = m_decode_table[i].match;
+    uint16_t mask =   m_decode_table[i].mask;
+    uint16_t match =  m_decode_table[i].match;
 
     if ((m_inst & mask) == match) {
       (this->*(m_decode_table[i].decode))();

@@ -6,16 +6,6 @@
 
 static int WIDTH = 0, HEIGHT = 0;
 
-#define fbdraw(TYPE, k, dst, src, n) \
-TYPE *dstp = (TYPE *)(dst); \
-TYPE *srcp = (TYPE *)(src); \
-n = n >> k;\
-size_t len = (n); \
-if ((dstp != NULL) && (srcp != NULL)) { \
-  while (len--) *dstp++ = *srcp++; \
-}
-
-
 void __am_gpu_init() {
   WIDTH  = inw(VGACTL_ADDR + 2);
   HEIGHT = inw(VGACTL_ADDR);
@@ -27,8 +17,8 @@ void __am_gpu_init() {
 void __am_gpu_config(AM_GPU_CONFIG_T *cfg) {
   *cfg = (AM_GPU_CONFIG_T) {
     .present = true, .has_accel = false,
-    .width = 400, .height = 300,
-    .vmemsz = 400 * 300 * 3
+    .width = WIDTH, .height = HEIGHT,
+    .vmemsz = WIDTH * HEIGHT * 3
   };
 }
 
@@ -37,7 +27,14 @@ void __am_gpu_fbdraw(AM_GPU_FBDRAW_T *ctl) {
   uint32_t *pixels = ctl->pixels;
 
   for (int row = 0; row < ctl->h; row++) {
-    fbdraw(int32_t, 2, &fb[ctl->x + (ctl->y + row) * WIDTH], pixels, ctl->w);
+    int32_t *dstp = (int32_t *)(&fb[ctl->x + (ctl->y + row) * WIDTH]);
+    int32_t *srcp = (int32_t *)(pixels);
+    ctl->w = ctl->w >> 2;
+    size_t len = (ctl->w);
+    if ((dstp != ((void*)0)) && (srcp != ((void*)0))) {
+      while (len--)
+        *dstp++ = *srcp++;
+    }
     pixels += ctl->w;
   }
   if (ctl->sync) {

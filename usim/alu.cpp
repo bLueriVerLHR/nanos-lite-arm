@@ -432,6 +432,7 @@ void ALU::exec_bcond()
 void ALU::exec_svc()
 {
   /* FIXME: Not implemented */
+  m_regs[15] = 44;
 }
 
 void ALU::exec_str()
@@ -444,7 +445,6 @@ void ALU::exec_strh()
 {
   *m_addr = m_regs[m_i.rn] + m_regs[m_i.rm];
   *m_data = m_regs[m_i.rd];
-  
 }
 
 void ALU::exec_strb() {}
@@ -482,7 +482,11 @@ void ALU::exec_wfi() {}
 void ALU::exec_sev() {}
 void ALU::exec_msr() {}
 void ALU::exec_mrs() {}
-void ALU::exec_bl() {}
+
+void ALU::exec_bl() {
+  m_regs[15] += m_i.imm;
+}
+
 void ALU::exec_dsb() {}
 void ALU::exec_dmb() {}
 void ALU::exec_isb() {}

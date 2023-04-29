@@ -22,12 +22,12 @@ static inline void nop() { asm volatile("nop"); }
 static inline void dmb() { asm volatile("dmb"); }
 static inline void dsb() { asm volatile("dsb"); }
 static inline void isb() { asm volatile("isb"); }
+static inline void yield() { asm volatile("yield"); }
 
-#define svc(imm)                                                               \
-  do {                                                                         \
-    asm volatile("svc"                                                         \
-                 " #" #imm);                                                   \
-  } while (0)
+#define svc(code) asm volatile ("svc %[immediate]"::[immediate] "I" (code))
+
+#define bkpt(code) asm volatile ("bkpt %[immediate]"::[immediate] "I" (code))
+
 
 // main.c
 void start(void);
@@ -37,6 +37,6 @@ int main(void);
 // misc
 //
 
-void do_syscall(uintptr_t a[4]);
+uintptr_t do_syscall(uintptr_t r0, uintptr_t r1, uintptr_t r2, uintptr_t r3);
 
 #endif
