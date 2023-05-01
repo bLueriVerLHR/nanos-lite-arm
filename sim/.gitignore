@@ -1,7 +1,3 @@
-sim/build
-build
-gcc-*
-
 # Prerequisites
 *.d
 
@@ -34,3 +30,9 @@ gcc-*
 *.exe
 *.out
 *.app
+
+# Makes
+build/
+
+# IDE
+.vscode/
