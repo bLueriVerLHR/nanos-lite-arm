@@ -51,6 +51,10 @@
         "stdexcept": "cpp",
         "streambuf": "cpp",
         "cinttypes": "cpp",
-        "typeinfo": "cpp"
+        "typeinfo": "cpp",
+        "common.h": "c",
+        "am.h": "c",
+        "devaddr.h": "c",
+        "def.h": "c"
     }
 }

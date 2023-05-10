@@ -1,8 +1,10 @@
-PREFIX := arm-none-eabi-
+# COMPILER_DIR:= gcc-arm-none-eabi-10.3-2021.10/bin/
+PREFIX 		:= arm-none-eabi-
 
-CC := $(PREFIX)gcc
-OC := $(PREFIX)objcopy
-OD := $(PREFIX)objdump
+CC := $(COMPILER_DIR)$(PREFIX)gcc
+OC := $(COMPILER_DIR)$(PREFIX)objcopy
+OD := $(COMPILER_DIR)$(PREFIX)objdump
+RE := $(COMPILER_DIR)$(PREFIX)readelf
 
 BIN 			:= armos
 BUILD 			:= build
@@ -14,9 +16,9 @@ LDFILES		:= $(shell find $(LDDIR) -name '*.ld')
 
 # C sources are compiled in cortex-m0 env
 COMMONFLAGS := -mcpu=cortex-m0 -mlittle-endian
-CPPFLAGS 	:= -DDEBUG_MODE -D__OPTIMIZE_SIZE__ -DPREFER_SIZE_OVER_SPEED
+CPPFLAGS 	:= -DDEBUG_MODE
 CFLAGS 		:= $(COMMONFLAGS) -nostartfiles -mthumb -Os
-LDFLAGS 	:= $(COMMONFLAGS) $(addprefix -T,$(LDFILES)) -nostartfiles # -nostdlib
+LDFLAGS 	:= $(COMMONFLAGS) -nostartfiles --specs=nano.specs # $(addprefix -T,$(LDFILES)) # -nostdlib
 
 # C++ sources are compiled in native env
 CXXFLAGS	+= -std=c++2a
@@ -29,13 +31,7 @@ BOOT_SRC_NODIR 	:= $(notdir $(BOOT_SRC))
 BOOT_OBJ 		:= $(patsubst %.c,%.o,$(BOOT_SRC_NODIR))
 BOOT_OBJ_BUILD 	:= $(addprefix $(BOOT_BUILD_DIR)/,$(BOOT_OBJ))
 
-USIM 			:= usim
-USIM_BUILD_DIR	:= $(ABS_BUILD_DIR)/$(USIM)
-USIM_SRC 		:= $(shell find $(USIM) -name '*.cpp')
-USIM_SRC_NODIR 	:= $(notdir $(USIM_SRC))
-USIM_OBJ 		:= $(patsubst %.cpp,%.o,$(USIM_SRC_NODIR))
-USIM_OBJ_BUILD 	:= $(addprefix $(USIM_BUILD_DIR)/,$(USIM_OBJ))
-USIM_BUILD 		:= $(BUILD)/$(USIM).cm0
+SIM := sim/build/sim
 
 SYSCALL 			:= syscall
 SYSCALL_BUILD_DIR	:= $(ABS_BUILD_DIR)/$(SYSCALL)
@@ -67,9 +63,6 @@ $(BUILD):
 $(BOOT_BUILD_DIR):
 	mkdir -p $(BOOT_BUILD_DIR)
 
-$(USIM_BUILD_DIR):
-	mkdir -p $(USIM_BUILD_DIR)
-
 $(SYSCALL_BUILD_DIR):
 	mkdir -p $(SYSCALL_BUILD_DIR)
 	
@@ -78,12 +71,6 @@ $(NANOS_BUILD_DIR):
 
 $(AM_BUILD_DIR):
 	mkdir -p $(AM_BUILD_DIR)
-
-$(USIM_OBJ_BUILD): $(USIM_BUILD_DIR)/%.o:$(USIM)/%.cpp
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $^ -o $@
-
-$(USIM_BUILD): $(USIM_OBJ_BUILD)
-	$(CXX) $(CXXFLAGS) -o $@ $^
 
 $(BOOT_OBJ_BUILD): $(BOOT_BUILD_DIR)/%.o:$(BOOT)/%.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $^ -o $@
@@ -106,12 +93,15 @@ all: usim arm
 arm: $(ALL_BUILD_DIR) $(ALL_OBJ)
 	$(CC) -o $(BIN_BUILD) $(ALL_OBJ) $(LDFLAGS)
 	$(OD) -D $(BIN_BUILD) > $(BIN_BUILD).dump
+	$(RE) -a $(BIN_BUILD) > $(BIN_BUILD).info
 	$(OC) $(BIN_BUILD) -O binary $(BIN_BUILD).bin
 
-usim: $(USIM_BUILD_DIR) $(USIM_BUILD)
+$(SIM):
+	$(MAKE) -C sim
 
-utest: $(ALL_BUILD_DIR) $(USIM_BUILD) arm
-	$(USIM_BUILD) $(BIN_BUILD).bin
+utest: $(ALL_BUILD_DIR) $(SIM) arm
+	$(SIM) $(BIN_BUILD).bin
 
 clean:
-	rm -r $(BUILD)
+	rm -rf $(BUILD)
+	$(MAKE) clean -C sim

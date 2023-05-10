@@ -28,9 +28,8 @@ static inline void yield() { asm volatile("yield"); }
 
 #define bkpt(code) asm volatile ("bkpt %[immediate]"::[immediate] "I" (code))
 
-
 // main.c
-void start(void);
+void _start(void);
 int main(void);
 
 //

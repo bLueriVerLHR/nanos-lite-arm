@@ -2,7 +2,7 @@ ENTRY(start)
 
 SECTIONS
 {
-    intbl    0x00000000: { *(Exceptions) }
+    .interp 0x00000000: { *(.interp) }
     .text : {
         *(.text)
         *(.text*)
@@ -13,5 +13,5 @@ SECTIONS
     .bss : {
         *(.bss)
     }
-    eob : { *(EoB) }
+    .eob : { *(.eob) }
 }

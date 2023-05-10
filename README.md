@@ -1,7 +1,6 @@
 # NANOS-LITE For ARM
 
 Target Platform: Cortex-m0
-Simulator: [usim](https://github.com/bravegnu/usim)
 
 ## Change in USIM
 

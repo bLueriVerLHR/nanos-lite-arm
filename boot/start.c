@@ -1,6 +1,6 @@
 #include "def.h"
 
-void start(void) {
+void _start(void) {
   volatile int result = main();
   while (1)
     ;
